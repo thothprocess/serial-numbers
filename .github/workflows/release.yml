@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies and build Vite
         run: |
           npm ci
-          npm vite build
+          npx vite build
 
       # Set up PHP for Composer install
       - name: Set up PHP

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -13,25 +14,20 @@ import {
 import { LuMoreHorizontal } from 'react-icons/lu';
 import { PageHeader } from '@/components/PageHeader';
 import { MaskedSerialNumber } from '@/components/serial-numbers/MaskedSerialNumber';
-import { Customer, usePagination } from '@/api/queries/customers';
+import {
+  Customer,
+  fetchCustomers,
+  usePagination,
+} from '@/api/queries/customers';
 import { applications, versions } from '@/api/queries/products';
-import { ProgressDialog } from '@/components/ProgressDialog';
 import { ResponsiveDialog } from '@/components/ResponsiveDialog';
 import { CustomerDetail } from '@/components/serial-numbers/CustomerDetail';
+import { DataTable } from '@/components/DataTable';
 
 export const Customers: React.FC = () => {
   const { page, limit, setPage, setLimit } = usePagination();
   const { selectedCustomer, setSelectedCustomer } = useState(false);
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-
-  const handleExport = () => {
-    setIsExporting(true);
-  };
-
-  const handleShowCustomerDetail = () => {
-    setIsCustomerDialogOpen(true);
-  };
 
   const handleShowCustomerDetailChange = (open: boolean) => {
     setIsCustomerDialogOpen(open);
@@ -151,6 +147,43 @@ export const Customers: React.FC = () => {
           );
         },
       },
+
+      {
+        id: 'order',
+        enableSorting: false,
+        enableHiding: true,
+        header: 'Order',
+        cell: ({ row }) => (
+          <div>
+            <div>&nbsp;</div>
+          </div>
+        ),
+      },
+
+      {
+        id: 'expiration',
+        enableSorting: false,
+        enableHiding: true,
+        header: 'Expiration',
+        cell: ({ row }) => (
+          <div>
+            <div>&nbsp;</div>
+          </div>
+        ),
+      },
+
+      {
+        id: 'activation',
+        enableSorting: false,
+        enableHiding: true,
+        header: 'Activation',
+        cell: ({ row }) => (
+          <div>
+            <div>0/10</div>
+          </div>
+        ),
+      },
+
       {
         accessorKey: 'serialNumber',
         enableSorting: true,
@@ -202,25 +235,20 @@ export const Customers: React.FC = () => {
     []
   );
 
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['customers', page, limit],
+    queryFn: () => fetchCustomers(page, limit),
+    placeholderData: keepPreviousData,
+  });
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error instanceof Error) return <p>Error: {error.message}</p>;
+
   return (
     <>
       <PageHeader title="Customers" />
 
-      <div className="space-x-1">
-        <Button variant="outline" onClick={handleExport}>
-          {isExporting ? 'Exporting...' : 'Export'}
-        </Button>
-        <Button variant="outline" onClick={handleShowCustomerDetail}>
-          View Customer
-        </Button>
-      </div>
-
-      <ProgressDialog
-        isOpen={isExporting}
-        title="Exporting"
-        description="Please wait while we complete your request."
-        onClose={() => setIsExporting(false)}
-      />
+      <DataTable columns={columns} data={data} />
 
       <ResponsiveDialog
         open={isCustomerDialogOpen}
