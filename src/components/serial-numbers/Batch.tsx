@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 import { useCopyToClipboard } from 'react-use';
 import { Customer, fetchCustomerById } from '@/api/queries/customers';
 import { batchGenerate } from '@/api/queries/serial-numbers';
-import { applications, versions } from '@/api/queries/products';
+import { CustomerResult } from '@/components/serial-numbers/CustomerResult';
 import { useToast } from '@/hooks/use-toast';
 import { PageHeader } from '@/components/PageHeader';
 import { SelectWrapper } from '@/components/SelectWrapper';
@@ -71,7 +71,7 @@ export const Batch: React.FC = () => {
   const copyAllSerials = () => {
     copyToClipboard(serialNumbers.join('\n'));
     toast({
-      title: 'All serials copied to clipboard',
+      title: 'All serial numbers copied to clipboard',
     });
   };
 
@@ -89,46 +89,14 @@ export const Batch: React.FC = () => {
           id="search"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="Enter ID or Serial Number"
+          placeholder="Enter customer ID"
           className="flex-1"
         />
         <Button variant="outline" size="icon" onClick={handleSearch}>
           <LuSearch className="w-5 h-5" />
         </Button>
       </div>
-      {customer && (
-        <div className="p-4 bg-gray-100 rounded-md">
-          <h3 className="text-lg font-semibold underline">Customer</h3>
-          <p>
-            <strong>ID:</strong> {customer.id}
-          </p>
-          <p>
-            <strong>Name:</strong> {customer.fullName}
-          </p>
-          <p>
-            <strong>Email:</strong> {customer.email}
-          </p>
-          <p>
-            <strong>Phone:</strong> {customer.phone}
-          </p>
-          <p>
-            <strong>Application:</strong>{' '}
-            {
-              applications.find(
-                (application) => application.value === customer.application
-              )['label']
-            }
-          </p>
-          <p>
-            <strong>Version:</strong>{' '}
-            {
-              versions.find((version) => version.value === customer.version)[
-                'label'
-              ]
-            }
-          </p>
-        </div>
-      )}
+      {customer && <CustomerResult customer={customer} />}
       {error && <p className="text-red-500">{error}</p>}
       <div className="my-2">
         <SelectWrapper

@@ -173,18 +173,6 @@ function serial_numbers_register_rest_routes()
     register_rest_route( SERIAL_NUMBERS_API_NAMESPACE, '/customers', array(
         'methods' => 'GET',
         'callback' => 'serial_numbers_fetch_customers',
-        'args' => [
-            'page' => [
-                'required' => false,
-                'validate_callback' => 'is_numeric',
-                'default' => 1,
-            ],
-            'limit' => [
-                'required' => false,
-                'validate_callback' => 'validate_limit',
-                'default' => 10,
-            ],
-        ],
         'permission_callback' => '__return_true',
     ) );
 
@@ -230,20 +218,22 @@ function serial_numbers_fetch_customers( WP_REST_Request $request )
         'paged' => $page,
     ];
 
-    $query = new WC_Customer_Query( $args );
-    $customers = $query->get_customers();
-    $total_customers = $query->get_total();
-    $total_pages = $limit === 'all' ? 1 : ceil( $total_customers / $limit );
+    // $query = new WC_Customer_Query( $args );
+    // $customers = $query->get_customers();
+    // $total_customers = $query->get_total();
+    // $total_pages = $limit === 'all' ? 1 : ceil( $total_customers / $limit );
 
-    return new WP_REST_Response( [
-        'customers' => $customers,
-        'pagination' => [
-            'total_customers' => $total_customers,
-            'total_pages' => $total_pages,
-            'current_page' => $page,
-            'limit' => $limit,
-        ],
-    ] );
+    // return new WP_REST_Response( [
+    //     'customers' => $customers,
+    //     'pagination' => [
+    //         'total_customers' => $total_customers,
+    //         'total_pages' => $total_pages,
+    //         'current_page' => $page,
+    //         'limit' => $limit,
+    //     ],
+    // ] );
+
+    return new WP_REST_Response( [], 200 );
 }
 
 function wp_boilerplate_create_customer( WP_REST_Request $request )

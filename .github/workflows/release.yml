@@ -24,13 +24,13 @@ jobs:
       - name: Install dependencies and build Vite
         run: |
           npm ci
-          npm run build
+          npm vite build
 
       # Set up PHP for Composer install
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1' # Use the PHP version you require
+          php-version: '8.2' # Use the PHP version you require
 
       # Install Composer dependencies
       - name: Install Composer dependencies
