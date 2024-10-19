@@ -1,0 +1,12 @@
+{
+  "name": "thothprocess/wp-boilerplate",
+  "version": "0.1.0",
+  "description": "Boilerplate for developing wordpress plugin",
+  "require": {
+    "kucrut/vite-for-wp": "^0.9.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.3",
+    "brain/monkey": "^2.6"
+  }
+}
