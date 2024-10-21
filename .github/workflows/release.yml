@@ -36,6 +36,10 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-dev --prefer-dist --optimize-autoloader
 
+      # Debug: List current directory and files
+      - name: List files before zip
+        run: ls -la
+
       # Get version from tag
       - name: Get version from tag
         id: get_version
@@ -44,14 +48,16 @@ jobs:
       # Zip the build files and vendor directory
       - name: Create release zip
         run: |
+          ls -la # List files in the current directory to see what's available
           zip -r serial-numbers.zip dist vendor serial-numbers.php
+          ls -la # List files again to confirm the zip file was created
 
       # Upload release asset to GitHub
       - name: Upload release artifact
         uses: actions/upload-artifact@v3
         with:
-          name: plugin-release
-          path: plugin-release.zip
+          name: serial-numbers
+          path: serial-numbers.zip
 
   # Release step (only runs on version tag pushes)
   release:
