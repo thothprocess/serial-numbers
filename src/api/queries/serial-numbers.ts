@@ -44,13 +44,25 @@ export const createFormData = (customer: Customer) => {
   };
   const formData = new FormData();
   Object.entries(data).forEach(([key, value]) => {
-    formData.append(key, value);
+    formData.append(key, String(value));
   });
   formData.append('CRC', generateCrc(data));
   return formData;
 };
 
-export const generateCrc = (params: Record<string, string>): string => {
+interface CrcProps {
+  Key: string;
+  Action: string;
+  Name: string;
+  Email: string;
+  Address: string;
+  Cell: string;
+  App?: string;
+  Version?: string;
+  Options?: string;
+}
+
+export const generateCrc = (params: CrcProps): string => {
   const concatenatedParams = Object.entries(params)
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
     .join('&');

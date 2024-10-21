@@ -1,94 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { useForm, FieldValues } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import {
   Select,
-  SelectGroup,
-  SelectLabel,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/PageHeader';
 
-interface DemoKeyFlagFieldProps {
-  label?: string;
-  placeholder?: string;
-  description?: string;
-  flagNumber: number;
-  field?: FieldValues;
-}
-
-const DemoKeyFlagField: React.FC<DemoKeyFlagFieldProps> = ({
-  label,
-  placeholder,
-  description,
-  flagNumber,
-  field,
-}) => {
-  const generateFlags = (flagNumber: number) => {
-    return [...Array(32).keys()].map((index) => {
-      return {
-        label: `Flag ${flagNumber} Value ${index}`,
-        value: (index + 1).toString(),
-      };
-    });
-  };
-
-  return (
-    <div>
-      <FormItem>
-        <FormLabel>{label}</FormLabel>
-        <FormControl>
-          <Select {...field} onValueChange={field?.onChange}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent position="popper">
-              <SelectGroup>
-                <SelectLabel>{label}</SelectLabel>
-                {generateFlags(flagNumber).map((option, index) => {
-                  return (
-                    <SelectItem key={index} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  );
-                })}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </FormControl>
-        {description && <FormDescription>{description}</FormDescription>}
-        <FormMessage />
-      </FormItem>
-    </div>
-  );
-};
-
 export const Demo: React.FC = () => {
-  const [expirationDate, setExpirationDate] = useState<Date>(new Date());
   const [daysUntilExpiration, setDaysUntilExpiration] = useState(0);
-
-  useEffect(() => {
-    const diffTime = expirationDate.getTime() - new Date().getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    setDaysUntilExpiration(diffDays);
-  }, [expirationDate]);
+  const [expirationDate, setExpirationDate] = useState<Date>(new Date());
 
   const versions = [...Array(10).keys()].map((index) => {
     const value = (index + 1).toString();
@@ -146,6 +81,15 @@ export const Demo: React.FC = () => {
     console.log(expirationDate);
   };
 
+  const generateFlags = (flagNumber: number) => {
+    return [...Array(32).keys()].map((index) => {
+      return {
+        label: `Flag ${flagNumber} Value ${index}`,
+        value: (index + 1).toString(),
+      };
+    });
+  };
+
   const generateExtendDays = () => {
     return [...Array(60).keys()].map((index) => {
       const plural = index === 0 ? 'Day' : 'Days';
@@ -156,6 +100,12 @@ export const Demo: React.FC = () => {
     });
   };
 
+  useEffect(() => {
+    const diffTime = expirationDate.getTime() - new Date().getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    setDaysUntilExpiration(diffDays);
+  }, [expirationDate]);
+
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
     console.log('Submitted Data:', data);
   };
@@ -163,6 +113,7 @@ export const Demo: React.FC = () => {
   return (
     <>
       <PageHeader title="Demo" />
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2">
           <FormField
@@ -172,23 +123,18 @@ export const Demo: React.FC = () => {
               <FormItem>
                 <FormLabel>Version</FormLabel>
                 <FormControl>
-                  <Select {...field} onValueChange={field?.onChange}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select version" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent position="popper">
-                      <SelectGroup>
-                        <SelectLabel>Select version</SelectLabel>
-                        {versions.map((option, index) => {
-                          return (
-                            <SelectItem key={index} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectGroup>
+                  <Select value={field?.value} onValueChange={field?.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select version" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {versions.map((option) => {
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -237,34 +183,152 @@ export const Demo: React.FC = () => {
               Reset
             </Button>
           </div>
+
           <FormField
             control={form.control}
             name="flag_1"
             render={({ field }) => (
-              <DemoKeyFlagField label="Flag 1" flagNumber={1} field={field} />
+              <FormItem>
+                <FormLabel>Flag 1</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field?.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Flag 1" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {generateFlags(1).map((option) => {
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="flag_1"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Flag 1</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field?.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Flag 1" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {generateFlags(1).map((option) => {
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="flag_2"
             render={({ field }) => (
-              <DemoKeyFlagField label="Flag 2" flagNumber={2} field={field} />
+              <FormItem>
+                <FormLabel>Flag 2</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field?.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Flag 2" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {generateFlags(2).map((option) => {
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="flag_3"
             render={({ field }) => (
-              <DemoKeyFlagField label="Flag 3" flagNumber={3} field={field} />
+              <FormItem>
+                <FormLabel>Flag 3</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field?.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Flag 3" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {generateFlags(3).map((option) => {
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="flag_4"
             render={({ field }) => (
-              <DemoKeyFlagField label="Flag 4" flagNumber={4} field={field} />
+              <FormItem>
+                <FormLabel>Flag 4</FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field?.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Flag 4" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {generateFlags(4).map((option) => {
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="extend_demo"
@@ -278,16 +342,14 @@ export const Demo: React.FC = () => {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="extend_by"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Extend By</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a version" />
@@ -295,7 +357,7 @@ export const Demo: React.FC = () => {
                   </FormControl>
                   <SelectContent>
                     {generateExtendDays().map((version) => (
-                      <SelectItem value={version.value}>
+                      <SelectItem key={version.value} value={version.value}>
                         {version.label}
                       </SelectItem>
                     ))}
@@ -305,14 +367,7 @@ export const Demo: React.FC = () => {
               </FormItem>
             )}
           />
-          <FormItem>
-            <FormLabel>Result</FormLabel>
-            <FormControl>
-              <pre className="mt-2 rounded-md p-4 bg-slate-100">
-                <code className="font-mono">&nbsp;</code>
-              </pre>
-            </FormControl>
-          </FormItem>
+
           <Button type="submit" className="w-full">
             Submit
           </Button>

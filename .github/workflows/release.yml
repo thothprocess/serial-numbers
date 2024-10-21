@@ -44,17 +44,14 @@ jobs:
       # Zip the build files and vendor directory
       - name: Create release zip
         run: |
-          zip -r serial-numbers-${{ env.VERSION }}.zip \
-          dist/ \
-          vendor/ \
-          serial-numbers.php
+          zip -r serial-numbers.zip dist vendor serial-numbers.php
 
       # Upload release asset to GitHub
       - name: Upload release artifact
         uses: actions/upload-artifact@v3
         with:
-          name: plugin-release-${{ env.VERSION }}
-          path: plugin-release-${{ env.VERSION }}.zip
+          name: plugin-release
+          path: plugin-release.zip
 
   # Release step (only runs on version tag pushes)
   release:

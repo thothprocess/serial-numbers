@@ -7,10 +7,11 @@ import { CustomerResult } from '@/components/serial-numbers/CustomerResult';
 import { useToast } from '@/hooks/use-toast';
 import { PageHeader } from '@/components/PageHeader';
 import { SelectWrapper } from '@/components/SelectWrapper';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { FaSpinner } from 'react-icons/fa';
-import { LuCopy, LuSearch } from 'react-icons/lu';
+import { LuCopy } from 'react-icons/lu';
 
 export const Batch: React.FC = () => {
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -84,6 +85,8 @@ export const Batch: React.FC = () => {
   return (
     <>
       <PageHeader title="Batch" />
+      <Label htmlFor="search">Search for customer</Label>
+      <br />
       <div className="flex space-x-2 items-center my-2">
         <Input
           id="search"
@@ -92,12 +95,14 @@ export const Batch: React.FC = () => {
           placeholder="Enter customer ID"
           className="flex-1"
         />
-        <Button variant="outline" size="icon" onClick={handleSearch}>
-          <LuSearch className="w-5 h-5" />
+        <Button variant="outline" onClick={handleSearch}>
+          Search
         </Button>
       </div>
       {customer && <CustomerResult customer={customer} />}
       {error && <p className="text-red-500">{error}</p>}
+      <Label>Select number of serial numbers to generate</Label>
+      <br />
       <div className="my-2">
         <SelectWrapper
           value={`${count}`}

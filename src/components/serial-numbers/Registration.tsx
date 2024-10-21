@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -23,12 +24,15 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
-import { usePagination, createCustomer } from '@/api/queries/customers';
+import { createCustomer } from '@/api/queries/customers';
 import { applications, versions, options } from '@/api/queries/products';
+import { Country, State, City } from 'country-state-city';
 
 export const Registration = () => {
-  const { page, limit } = usePagination();
   const queryClient = useQueryClient();
+  const [countries, setCountries] = useState(Country.getAllCountries());
+  const [states, setStates] = useState<(typeof State)[]>([]);
+  const [cities, setCities] = useState<(typeof City)[]>([]);
 
   const addressSchema = z.object({
     streetAddress: z.string().min(1, 'Street address is required'),
@@ -59,6 +63,14 @@ export const Registration = () => {
       fullName: '',
       email: '',
       company: '',
+      address: {
+        streetAddress: '',
+        secondaryAddress: '',
+        country: '',
+        stateAbbr: '',
+        city: '',
+        zipCode: '',
+      },
       phone: '',
       application: '2',
       version: '1',
@@ -66,15 +78,59 @@ export const Registration = () => {
     },
   });
 
-  const createCustomerMutation = useMutation({
+  const selectedCountry = form.watch('address.country');
+  const selectedState = form.watch('address.stateAbbr');
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const stateList = State.getStatesOfCountry(selectedCountry);
+      setStates(stateList);
+      setCities([]);
+    } else {
+      setStates([]);
+      setCities([]);
+    }
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    if (selectedState && selectedCountry) {
+      const cityList = City.getCitiesOfState(selectedCountry, selectedState);
+      setCities(cityList);
+    } else {
+      setCities([]);
+    }
+  }, [selectedState, selectedCountry]);
+
+  const mutation = useMutation({
     mutationFn: createCustomer,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers', page, limit] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
     },
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log('Submitted Data:', data);
+
+    const customer = {
+      fullName: data.fullName,
+      email: data.email,
+      company: data.company,
+      address: {
+        streetAddress: data.address.streetAddress,
+        secondaryAddress: data.address.secondaryAddress,
+        city: data.address.city,
+        stateAbbr: data.address.stateAbbr,
+        zipCode: data.address.zipCode,
+        country: data.address.country,
+      },
+      phone: data.phone,
+      application: data.application,
+      version: data.version,
+      options: data.options,
+      serialNumber: '',
+    };
+
+    mutation.mutate(customer);
   };
 
   return (
@@ -121,6 +177,135 @@ export const Registration = () => {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="address.streetAddress"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Address</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="address.secondaryAddress"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Secondary Address</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="address.country"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Country</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem
+                          key={country.isoCode}
+                          value={country.isoCode}
+                        >
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="address.stateAbbr"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>State</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select State" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {states.length > 0 ? (
+                        states.map((state) => (
+                          <SelectItem key={state.isoCode} value={state.isoCode}>
+                            {state.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem disabled>No states available</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="address.city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select City" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cities.length > 0 ? (
+                        cities.map((city) => (
+                          <SelectItem key={city.name} value={city.name}>
+                            {city.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem disabled>No cities available</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="address.zipCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Zip</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="phone"

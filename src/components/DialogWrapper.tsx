@@ -18,14 +18,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { useMedia } from 'react-use';
 
-interface ResponsiveDialogProps {
+interface DialogWrapperProps {
   title: string;
   children: React.ReactNode;
   open: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }
 
-export const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
+export const DialogWrapper: React.FC<DialogWrapperProps> = ({
   title,
   children,
   open,

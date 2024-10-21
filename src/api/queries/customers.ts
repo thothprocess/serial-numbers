@@ -1,19 +1,21 @@
 import { create } from 'zustand';
 import { mockApi } from '@/api/mockapi';
 
-interface PaginationState {
+interface CustomersPaginationState {
   page: number;
   limit: number;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
 }
 
-export const usePagination = create<PaginationState>((set) => ({
-  page: 1,
-  limit: 10,
-  setPage: (page: number) => set({ page }),
-  setLimit: (limit: number) => set({ limit }),
-}));
+export const useCustomersPagination = create<CustomersPaginationState>(
+  (set) => ({
+    page: 1,
+    limit: 10,
+    setPage: (page: number) => set({ page }),
+    setLimit: (limit: number) => set({ limit }),
+  })
+);
 
 export interface Address {
   streetAddress: string;
@@ -63,10 +65,7 @@ export const createCustomer = async (customer: Customer) => {
   return response.data;
 };
 
-export const updateCustomer = async (
-  customerId: number,
-  customer: Customer
-) => {
-  const response = await mockApi.put(`/customers${customerId}`, customer);
+export const updateCustomer = async (customer: Customer) => {
+  const response = await mockApi.put(`/customers/${customer.id}`, customer);
   return response.data;
 };

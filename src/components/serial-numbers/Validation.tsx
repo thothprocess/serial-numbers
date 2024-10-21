@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { LuSearch } from 'react-icons/lu';
 import { Customer, fetchCustomerBySN } from '@/api/queries/customers';
 import { CustomerResult } from '@/components/serial-numbers/CustomerResult';
 
@@ -13,8 +12,11 @@ export const Validation: React.FC = () => {
   const handleSearch = async () => {
     try {
       const response = await fetchCustomerBySN(searchValue);
-      setCustomer(response);
-      setError(null);
+      if (response.items.length > 0) {
+        const customer = response.items[0];
+        setCustomer(customer);
+        setError(null);
+      }
     } catch (err) {
       setError('Error finding customer.');
       setCustomer(null);
@@ -31,8 +33,8 @@ export const Validation: React.FC = () => {
           placeholder="Enter serial number"
           className="flex-1"
         />
-        <Button variant="outline" size="icon" onClick={handleSearch}>
-          <LuSearch className="w-5 h-5" />
+        <Button variant="outline" onClick={handleSearch}>
+          Search
         </Button>
       </div>
       {customer && <CustomerResult customer={customer} />}
